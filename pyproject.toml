@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qstrip"
+version = "0.1.0"
+description = "Fast Markdown Stripper"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+
+authors = [
+  { name = "Carl von Bonin", email = "contact@carl-vbn.dev" }
+]
+
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/carl-vbn/qstrip"
