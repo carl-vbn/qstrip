@@ -1,0 +1,17 @@
+# Short Markdown Example
+
+A short markdown file for testing purposes.
+
+## Subheading
+
+This is a paragraph with some **bold text** and *italic text*.
+
+   ## Another Subheading, but with extra spaces
+
+Here is a code block:
+```python
+def hello_world():
+    print("Hello, world!")
+```
+
+Woops here comes an `inline code` example!
