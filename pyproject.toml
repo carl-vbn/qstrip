@@ -9,12 +9,13 @@ description = "Fast Markdown Stripper"
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
-
 authors = [
   { name = "Carl von Bonin", email = "contact@carl-vbn.dev" }
 ]
-
 dependencies = []
+
+[project.scripts]
+qstrip = "qstrip.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/carl-vbn/qstrip"
