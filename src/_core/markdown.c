@@ -11,7 +11,30 @@
 #define CODE_MULTI_END 4 // Right after the last backtick
 #define CODE_INLINE 5 // Inside an inline code block
 
-char *strip(const char* name, Py_ssize_t len) {
+// Special macros for tracking links and images
+#define LINK_NOT 0 // Not in a link/image
+#define LINK_TEXT 1 // In the text part of a link/image
+#define LINK_URL 2 // In the URL part of a link/image
+
+// Utility function to look ahead in the string to check if a url in parenthesis is coming
+int link_lookahead(const char* text, Py_ssize_t len, Py_ssize_t pos) {
+    // Advance until the closing ']'
+    while (pos + 1 < len && text[pos] != '\n') {
+        if (text[pos] == ']') {
+            // Check if the next character is an opening parenthesis
+            if (pos + 1 < len && text[pos + 1] == '(') {
+                return TRUE; // Found a link
+            }
+            return FALSE; // Not a link
+        }
+
+        pos++;
+    }
+
+    return FALSE;
+}
+
+char *strip(const char* text, Py_ssize_t len) {
     char *outbuf = malloc(len + 1);
     if (!outbuf) return NULL;
 
@@ -19,17 +42,23 @@ char *strip(const char* name, Py_ssize_t len) {
     int lnstart = TRUE;
     int bold = FALSE;
     int italic = FALSE;
+    int strikethrough = FALSE;
+    int link = LINK_NOT;
     int code = CODE_NOT;
     int hasnext;
     char c;
 
     for (Py_ssize_t i = 0; i < len; i++) {
-        c = name[i];
+        c = text[i];
         hasnext = i + 1 < len;
 
         // Completely ignore carriage returns
         if (c == '\r') {
             continue;
+        }
+
+        if (code != CODE_NOT) {
+            goto code;
         }
 
         // Skip leading spaces, heading markers, and line breaks
@@ -45,7 +74,7 @@ char *strip(const char* name, Py_ssize_t len) {
 
         // Handle italic and bold markers
         if (c == '*') {
-            if (hasnext && name[i + 1] == '*') {
+            if (hasnext && text[i + 1] == '*') {
                 bold = !bold;
                 i++;
                 continue;
@@ -55,8 +84,47 @@ char *strip(const char* name, Py_ssize_t len) {
             }
         }
 
-        // Handle code markers
+        // Handle strikethrough markers
+        if (c == '~') {
+            if (hasnext && text[i + 1] == '~') {
+                strikethrough = !strikethrough;
+                i++;
+                continue;
+            }
+        }
 
+        // Handle links and images
+        if (link == LINK_NOT) {
+            if (c == '!' && hasnext && text[i + 1] == '[' && link_lookahead(text, len, i + 2)) {
+                // Entering image
+                link = LINK_TEXT;
+                i++;
+                continue;
+            }
+
+            if (c == '[' && link_lookahead(text, len, i + 1)) {
+                // Entering link
+                link = LINK_TEXT;
+                continue;
+            }
+        } else {
+            if (link == LINK_TEXT && c == ']') {
+                link = LINK_URL;
+                continue;
+            }
+            
+            if (link == LINK_URL) {
+                if (c == ')') {
+                    link = LINK_NOT;
+                }
+                continue;
+            }
+        }
+
+        
+
+code:
+        // Handle code
         if (code == CODE_MULTI_FIRSTLINE) {
             if (c == '\n') {
                 code = CODE_MULTI_IN;
@@ -67,6 +135,7 @@ char *strip(const char* name, Py_ssize_t len) {
         if (code == CODE_MULTI_END) {
             if (c == '\n') {
                 code = CODE_NOT;
+                lnstart = TRUE;
             }
             continue;
         }

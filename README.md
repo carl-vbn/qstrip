@@ -24,10 +24,11 @@ print(stripped_content)
 - [x] Strip headings
 - [x] Strip bold tags
 - [x] Strip italic tags
+- [x] Strip strikethrough tags
 - [x] Strip code blocks
 - [x] Strip inline code
-- [ ] Strip links
-- [ ] Strip images
+- [x] Strip links
+- [x] Strip images
 - [ ] Strip lists
 - [ ] Strip tables
 - [ ] Strip blockquotes
