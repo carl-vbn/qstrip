@@ -1,10 +1,7 @@
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
+#include "qstrip.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#define TRUE 1
-#define FALSE 0
 
 // Special macros for tracking code block states
 #define CODE_NOT 0 // Not in any code
@@ -97,7 +94,7 @@ char *strip(const char* name, Py_ssize_t len) {
     return outbuf;
 }
 
-static PyObject* py_strip_markdown(PyObject* self, PyObject* args) {
+PyObject* py_strip_markdown(PyObject* self, PyObject* args) {
     const char* input;
     Py_ssize_t len;
 
@@ -111,21 +108,4 @@ static PyObject* py_strip_markdown(PyObject* self, PyObject* args) {
     PyObject* output = Py_BuildValue("s", result);
     free(result);
     return output;
-}
-
-static PyMethodDef QStripMethods[] = {
-    {"strip_markdown", py_strip_markdown, METH_VARARGS, "Strip a markdown string."},
-    {NULL, NULL, 0, NULL}
-};
-
-static struct PyModuleDef qstripcoremodule = {
-    PyModuleDef_HEAD_INIT,
-    "_core",
-    NULL,
-    -1,
-    QStripMethods
-};
-
-PyMODINIT_FUNC PyInit__core(void) {
-    return PyModule_Create(&qstripcoremodule);
 }

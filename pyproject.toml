@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Fast Markdown Stripper"
 readme = "README.md"
 requires-python = ">=3.7"
-license = { file = "LICENSE" }
+license = "MIT"
 
 authors = [
   { name = "Carl von Bonin", email = "contact@carl-vbn.dev" }
@@ -18,3 +18,13 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/carl-vbn/qstrip"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[[tool.setuptools.ext-modules]]
+name = "qstrip._core"
+sources = ["src/_core/common.c", "src/_core/markdown.c"]
