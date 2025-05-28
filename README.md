@@ -1,5 +1,9 @@
 # qstrip
 
+![GitHub stars](https://img.shields.io/github/stars/carl-vbn/qstrip)
+![Build Status](https://github.com/carl-vbn/qstrip/actions/workflows/python-package.yml/badge.svg)
+![License](https://img.shields.io/github/license/carl-vbn/qstrip)
+
 A fast Markdown stripper with a C backend.
 
 ## Installation
