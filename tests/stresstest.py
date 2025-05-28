@@ -32,8 +32,10 @@ snippets = [
 ]
 
 for i in range(10000):
-    combined_markdown = "\n".join(snippets[(i+j) % len(snippets)][0] for j in range(1000))
-    combined_stripped = "\n".join(snippets[(i+j) % len(snippets)][1] for j in range(1000))
+    combined_markdown = "\n".join(
+        snippets[(i+j) % len(snippets)][0] for j in range(1000))
+    combined_stripped = "\n".join(
+        snippets[(i+j) % len(snippets)][1] for j in range(1000))
 
     output = strip_markdown(combined_markdown)
 
