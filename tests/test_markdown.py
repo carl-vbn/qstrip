@@ -21,11 +21,29 @@ def test_markdown_strikethrough():
 def test_markdown_code():
     assert strip_markdown("pre `code` post") == "pre code post"
 
+def test_markdown_code_block():
+    assert strip_markdown("```\ncode block\n```") == "code block\n"
+
 def test_markdown_link():
     assert strip_markdown("[link](http://example.com)") == "link"
 
 def test_markdown_image():
     assert strip_markdown("![alt text](image.jpg)") == "alt text"
+
+def test_headings_1():
+    assert strip_markdown("# Heading 1\n## Heading 2\n### Heading 3") == "Heading 1\nHeading 2\nHeading 3"
+
+def test_headings_2():
+    assert strip_markdown("Heading 1\n========\nHeading 2\n--------\nNon heading ====") == "Heading 1\nHeading 2\nNon heading ===="
+
+def test_code_mixed():
+    assert strip_markdown("Regular **bold** `code **bold in code**` *italic*") == "Regular bold code **bold in code** italic"
+
+def test_style_mixed():
+    assert strip_markdown("Regular **~~bold and strikethrough with some *italic*~~**") == "Regular bold and strikethrough with some italic"
+
+def test_markdown_empty():
+    assert strip_markdown("") == ""
 
 def test_markdown_short():
     strip_and_compare('tests/assets/short.md', 'tests/assets/stripped/short.txt')
