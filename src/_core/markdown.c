@@ -124,6 +124,31 @@ char *strip(const char* text, Py_ssize_t len) {
             goto code;
         }
 
+        if (lnstart) {
+            if (table == TABLE_HEAD) {
+                table = TABLE_SEPR;
+            } else if (table == TABLE_SEPR) {
+                table = TABLE_BODY;
+            } else if (table == TABLE_BODY) {
+                if (!ln_has_pipes(text, len, i)) {
+                    // If we are in a table but this line has no pipes,
+                    // we have reached the end of the table
+                    table = TABLE_NOT;
+                    
+                }
+            } else {
+                // Skip leading spaces, heading markers, and blank lines
+                if (c == ' ' || c == '#' || c == '\n' || c == '\r' || c == '\t' || c == '=' || c == '-') {
+                    continue;
+                }
+            }
+
+
+            lnstart = FALSE;
+        } else if (c == '\n') {
+            lnstart = TRUE;
+        }
+
         // Handle table state
         if (table == TABLE_UNK && c == '|') {
             if (table_lookahead(text, len, i)) {
@@ -136,7 +161,7 @@ char *strip(const char* text, Py_ssize_t len) {
         if (table == TABLE_HEAD || table == TABLE_BODY) {
             if (c == '|') {
                 // Emit a comma (if not at line start/end) and skip
-                if (!lnstart && hasnext && text[i + 1] != '\n') {
+                if (i > 0 && text[i - 1] != '\n' && hasnext && text[i + 1] != '\n') {
                     outbuf[j++] = ',';
                 }
 
@@ -167,31 +192,6 @@ char *strip(const char* text, Py_ssize_t len) {
             }
 
             continue;
-        }
-
-        if (lnstart) {
-            if (table == TABLE_BODY) {
-                if (!ln_has_pipes(text, len, i)) {
-                    // If we are in a table but this line has no pipes,
-                    // we have reached the end of the table
-                    table = TABLE_NOT;
-                    
-                }
-            } else {
-                // Skip leading spaces, heading markers, and blank lines
-                if (c == ' ' || c == '#' || c == '\n' || c == '\r' || c == '\t' || c == '=' || c == '-') {
-                    continue;
-                }
-            }
-
-
-            lnstart = FALSE;
-        } else if (c == '\n') {
-            if (table == TABLE_HEAD) {
-                table = TABLE_SEPR;
-            }
-
-            lnstart = TRUE;
         }
 
         // Handle italic and bold markers
