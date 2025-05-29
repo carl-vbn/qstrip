@@ -1,4 +1,6 @@
 dist/
-*.egg-info/
 __pycache__/
+.vscode/
+*.egg-info/
 *.pyd
+*.so

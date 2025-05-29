@@ -15,7 +15,7 @@ authors = [
 dependencies = []
 
 [project.scripts]
-qstrip = "qstrip.cli:main"
+qstrip = "qstrip.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/carl-vbn/qstrip"

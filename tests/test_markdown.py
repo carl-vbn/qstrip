@@ -71,6 +71,13 @@ def test_style_mixed():
                       "Regular bold and strikethrough with some italic")
 
 
+def test_markdown_table():
+    md_text = "| Header 1 | Header 2 |\n|----------|----------|\n"
+    md_text += "| Row 1   | Data 1   |\n| Row 2   | Data 2   |\n"
+    expected_text = "Header 1,Header 2\nRow 1,Data 1\nRow 2,Data 2\n"
+    strip_and_compare(md_text, expected_text)
+
+
 def test_markdown_empty():
     strip_and_compare("", "")
 
