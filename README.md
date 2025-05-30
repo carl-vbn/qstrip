@@ -33,8 +33,9 @@ print(stripped_content)
 - [x] Strip inline code
 - [x] Strip links
 - [x] Strip images
-- [ ] Strip lists
 - [x] Strip tables
+- [x] Handle images inside links
+- [ ] Strip lists
 - [ ] Strip blockquotes
 - [ ] Handle escape sequences
 - [ ] Support other markup formats (e.g., reStructuredText, HTML/XML)

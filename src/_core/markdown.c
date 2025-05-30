@@ -107,6 +107,7 @@ char *strip(const char* text, Py_ssize_t len) {
     int strikethrough = FALSE;
     int table = TABLE_UNK;
     int link = LINK_NOT;
+    int image = LINK_NOT;
     int code = CODE_NOT;
     int hasnext;
     char c;
@@ -134,7 +135,6 @@ char *strip(const char* text, Py_ssize_t len) {
                     // If we are in a table but this line has no pipes,
                     // we have reached the end of the table
                     table = TABLE_NOT;
-                    
                 }
             } else {
                 // Skip leading spaces, heading markers, and blank lines
@@ -215,15 +215,30 @@ char *strip(const char* text, Py_ssize_t len) {
             }
         }
 
-        // Handle links and images
-        if (link == LINK_NOT) {
+        // Handle images
+        if (image == LINK_NOT) {
             if (c == '!' && hasnext && text[i + 1] == '[' && link_lookahead(text, len, i + 2)) {
                 // Entering image
-                link = LINK_TXT;
+                image = LINK_TXT;
                 i++;
                 continue;
             }
+        } else {
+            if (image == LINK_TXT && c == ']') {
+                image = LINK_URL;
+                continue;
+            }
+            
+            if (image == LINK_URL) {
+                if (c == ')') {
+                    image = LINK_NOT;
+                }
+                continue;
+            }
+        }
 
+        // Handle links
+        if (link == LINK_NOT) {
             if (c == '[' && link_lookahead(text, len, i + 1)) {
                 // Entering link
                 link = LINK_TXT;
@@ -242,8 +257,6 @@ char *strip(const char* text, Py_ssize_t len) {
                 continue;
             }
         }
-
-        
 
 code:
         // Handle code

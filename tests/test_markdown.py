@@ -78,6 +78,11 @@ def test_markdown_table():
     strip_and_compare(md_text, expected_text)
 
 
+def test_markdown_link_image():
+    md_text = "[![alt text](image.jpg)](http://example.com)"
+    expected_text = "alt text"
+    strip_and_compare(md_text, expected_text)
+
 def test_markdown_empty():
     strip_and_compare("", "")
 
