@@ -83,10 +83,13 @@ def test_markdown_link_image():
     expected_text = "alt text"
     strip_and_compare(md_text, expected_text)
 
+
 def test_markdown_link_image_2():
-    md_text = "[pre ![image 1](image1.jpg) ![image 2](image2.jpg) post](http://example.com)"
+    md_text = "[pre ![image 1](image1.jpg) ![image 2](image2.jpg) " \
+              "post](http://example.com)"
     expected_text = "pre image 1 image 2 post"
     strip_and_compare(md_text, expected_text)
+
 
 def test_markdown_empty():
     strip_and_compare("", "")
