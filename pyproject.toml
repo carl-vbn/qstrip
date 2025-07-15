@@ -29,3 +29,6 @@ where = ["src"]
 [[tool.setuptools.ext-modules]]
 name = "qstrip._core"
 sources = ["src/_core/common.c", "src/_core/markdown.c"]
+
+[tool.setuptools.package-data]
+"*" = ["*.c", "*.h"]
