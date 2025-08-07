@@ -249,7 +249,8 @@ char *strip(const char* text, int mask, Py_ssize_t len) {
         // Handle links
         if (mask & MASK_LINK) {
             if (link == LINK_NOT) {
-                if (c == '[' && link_lookahead(text, len, i + 1)) {
+                // Avoid treating image alt-text as a link when images are not being stripped
+                if (c == '[' && !(i > 0 && text[i - 1] == '!') && link_lookahead(text, len, i + 1)) {
                     // Entering link
                     link = LINK_TXT;
                     continue;
