@@ -39,6 +39,7 @@ def strip_markdown(text: str, *, mask: Optional[Sequence[str]] = None) -> str:
 
     return _strip_markdown(text, bits)
 
+
 _MASK_TABLE = 1
 _MASK_LINK = 2
 _MASK_IMAGE = 4

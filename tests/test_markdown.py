@@ -125,7 +125,8 @@ def test_markdown_extralong():
 
 
 def test_mask_empty_list_strips_nothing():
-    md = "X [link](u) Y ![alt](img) Z `code`\n| A | B |\n|---|---|\n| 1 | 2 |\n"
+    md = "X [link](u) Y ![alt](img) Z `code`\n" \
+         "| A | B |\n|---|---|\n| 1 | 2 |\n"
     assert strip_markdown(md, mask=[]) == md
 
 

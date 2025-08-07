@@ -12,7 +12,8 @@ def main():
                         help="Output file to write the stripped "
                         "text to. Defaults to stdout.")
     parser.add_argument("--mask", type=str, default=None,
-                        help="Comma-separated elements to strip: table, link, image, code. Default: all")
+                        help="Comma-separated elements to strip: table, link,"
+                             " image, code. Default: all")
     args = parser.parse_args()
 
     if args.input:
