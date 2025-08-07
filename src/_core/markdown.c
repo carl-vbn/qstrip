@@ -23,6 +23,13 @@
 #define TABLE_SEPR 3 // In a table separator
 #define TABLE_BODY 4 // In a table body
 
+// Mask bits
+#define MASK_TABLE 1
+#define MASK_LINK 2
+#define MASK_IMAGE 4
+#define MASK_CODE 8
+#define MASK_ALL 15
+
 // Utility function to look ahead in the string to check if a url in parenthesis is coming
 int link_lookahead(const char* text, Py_ssize_t len, Py_ssize_t pos) {
     // Advance until the closing ']'
@@ -96,7 +103,7 @@ char next_nonspace_char(const char* text, Py_ssize_t len, Py_ssize_t pos) {
     return (pos < len) ? text[pos] : '\0';
 }
 
-char *strip(const char* text, Py_ssize_t len) {
+char *strip(const char* text, int mask, Py_ssize_t len) {
     char *outbuf = malloc(len + 1);
     if (!outbuf) return NULL;
 
@@ -121,7 +128,7 @@ char *strip(const char* text, Py_ssize_t len) {
             continue;
         }
 
-        if (code != CODE_NOT) {
+        if ((mask & MASK_CODE) && code != CODE_NOT) {
             goto code;
         }
 
@@ -150,7 +157,7 @@ char *strip(const char* text, Py_ssize_t len) {
         }
 
         // Handle table state
-        if (table == TABLE_UNK && c == '|') {
+        if ((mask & MASK_TABLE) && table == TABLE_UNK && c == '|') {
             if (table_lookahead(text, len, i)) {
                 table = TABLE_HEAD;
             } else {
@@ -158,7 +165,7 @@ char *strip(const char* text, Py_ssize_t len) {
             }
         }
 
-        if (table == TABLE_HEAD || table == TABLE_BODY) {
+        if ((mask & MASK_TABLE) && (table == TABLE_HEAD || table == TABLE_BODY)) {
             if (c == '|') {
                 // Emit a comma (if not at line start/end) and skip
                 if (i > 0 && text[i - 1] != '\n' && hasnext && text[i + 1] != '\n') {
@@ -183,7 +190,7 @@ char *strip(const char* text, Py_ssize_t len) {
             }
         }
 
-        if (table == TABLE_SEPR) {
+        if ((mask & MASK_TABLE) && table == TABLE_SEPR) {
             // If we are in a table separator, skip all characters
             // until the next newline
             
@@ -216,79 +223,85 @@ char *strip(const char* text, Py_ssize_t len) {
         }
 
         // Handle images
-        if (image == LINK_NOT) {
-            if (c == '!' && hasnext && text[i + 1] == '[' && link_lookahead(text, len, i + 2)) {
-                // Entering image
-                image = LINK_TXT;
-                i++;
-                continue;
-            }
-        } else {
-            if (image == LINK_TXT && c == ']') {
-                image = LINK_URL;
-                continue;
-            }
-            
-            if (image == LINK_URL) {
-                if (c == ')') {
-                    image = LINK_NOT;
+        if (mask & MASK_IMAGE) {
+            if (image == LINK_NOT) {
+                if (c == '!' && hasnext && text[i + 1] == '[' && link_lookahead(text, len, i + 2)) {
+                    // Entering image
+                    image = LINK_TXT;
+                    i++;
+                    continue;
                 }
-                continue;
+            } else {
+                if (image == LINK_TXT && c == ']') {
+                    image = LINK_URL;
+                    continue;
+                }
+                
+                if (image == LINK_URL) {
+                    if (c == ')') {
+                        image = LINK_NOT;
+                    }
+                    continue;
+                }
             }
         }
 
         // Handle links
-        if (link == LINK_NOT) {
-            if (c == '[' && link_lookahead(text, len, i + 1)) {
-                // Entering link
-                link = LINK_TXT;
-                continue;
-            }
-        } else {
-            if (link == LINK_TXT && c == ']') {
-                link = LINK_URL;
-                continue;
-            }
-            
-            if (link == LINK_URL) {
-                if (c == ')') {
-                    link = LINK_NOT;
+        if (mask & MASK_LINK) {
+            if (link == LINK_NOT) {
+                if (c == '[' && link_lookahead(text, len, i + 1)) {
+                    // Entering link
+                    link = LINK_TXT;
+                    continue;
                 }
-                continue;
+            } else {
+                if (link == LINK_TXT && c == ']') {
+                    link = LINK_URL;
+                    continue;
+                }
+                
+                if (link == LINK_URL) {
+                    if (c == ')') {
+                        link = LINK_NOT;
+                    }
+                    continue;
+                }
             }
         }
 
 code:
         // Handle code
-        if (code == CODE_MULTI_FLN) {
-            if (c == '\n') {
-                code = CODE_MULTI_IN;
+        if (mask & MASK_CODE) {
+            if (code == CODE_MULTI_FLN) {
+                if (c == '\n') {
+                    code = CODE_MULTI_IN;
+                }
+                continue;
             }
-            continue;
-        }
 
-        if (code == CODE_MULTI_END) {
-            if (c == '\n') {
-                code = CODE_NOT;
-                lnstart = TRUE;
+            if (code == CODE_MULTI_END) {
+                if (c == '\n') {
+                    code = CODE_NOT;
+                    lnstart = TRUE;
+                }
+                continue;
             }
-            continue;
-        }
 
-        if (c == '`') {
-            if (code == CODE_NOT) {
-                code = CODE_START;
+            if (c == '`') {
+                if (code == CODE_NOT) {
+                    code = CODE_START;
+                } else if (code == CODE_START) {
+                    code = CODE_MULTI_FLN;
+                } else if (code == CODE_INLN) {
+                    code = CODE_NOT;
+                } else if (code == CODE_MULTI_IN) {
+                    code = CODE_MULTI_END;
+                }
+                
+                continue;
             } else if (code == CODE_START) {
-                code = CODE_MULTI_FLN;
-            } else if (code == CODE_INLN) {
-                code = CODE_NOT;
-            } else if (code == CODE_MULTI_IN) {
-                code = CODE_MULTI_END;
+                code = CODE_INLN;
             }
-            
-            continue;
-        } else if (code == CODE_START) {
-            code = CODE_INLN;
         }
 
         outbuf[j++] = c;
@@ -301,11 +314,12 @@ code:
 PyObject* py_strip_markdown(PyObject* self, PyObject* args) {
     const char* input;
     Py_ssize_t len;
+    int mask = MASK_ALL;
 
-    if (!PyArg_ParseTuple(args, "s#", &input, &len))
+    if (!PyArg_ParseTuple(args, "s#|i", &input, &len, &mask))
         return NULL;
 
-    char* result = strip(input, len);
+    char* result = strip(input, mask, len);
     if (!result)
         return PyErr_NoMemory();
 

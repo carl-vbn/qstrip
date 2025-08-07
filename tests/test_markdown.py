@@ -122,3 +122,44 @@ def test_markdown_extralong():
 
     err = "Failed to match the expected output for long markdown text."
     assert matches, err
+
+
+def test_mask_empty_list_strips_nothing():
+    md = "X [link](u) Y ![alt](img) Z `code`\n| A | B |\n|---|---|\n| 1 | 2 |\n"
+    assert strip_markdown(md, mask=[]) == md
+
+
+def test_mask_only_link():
+    md = "X [link](u) Y ![alt](img) Z `code`"
+    expected = "X link Y ![alt](img) Z `code`"
+    assert strip_markdown(md, mask=["link"]) == expected
+
+
+def test_mask_only_image():
+    md = "X ![alt](img) Y [link](u) Z `code`"
+    expected = "X alt Y [link](u) Z `code`"
+    assert strip_markdown(md, mask=["image"]) == expected
+
+
+def test_mask_only_code():
+    md = "pre `code` post [link](u) ![alt](img)"
+    expected = "pre code post [link](u) ![alt](img)"
+    assert strip_markdown(md, mask=["code"]) == expected
+
+
+def test_mask_only_table():
+    md = "| A | B |\n|---|---|\n| 1 | 2 |\n"
+    expected = "A,B\n1,2\n"
+    assert strip_markdown(md, mask=["table"]) == expected
+
+
+def test_mask_link_and_image():
+    md = "X [link](u) ![alt](img) `code`"
+    expected = "X link alt `code`"
+    assert strip_markdown(md, mask=["link", "image"]) == expected
+
+
+def test_mask_all_string_equivalent_to_default():
+    md = "[link](u) ![alt](img) `code`\n| A | B |\n|---|---|\n| 1 | 2 |\n"
+    expected_default = strip_markdown(md)
+    assert strip_markdown(md, mask=["all"]) == expected_default
