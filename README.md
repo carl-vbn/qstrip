@@ -9,7 +9,7 @@ A fast Markdown stripper with a C backend.
 ## Installation
 
 ```bash
-pip install git+https://github.com/carl-vbn/qstrip.git
+pip install qstrip
 ```
 
 ## Usage
